@@ -1,0 +1,528 @@
+{
+  "name": "Client onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Welcome to Zahra AI Insights",
+        "formDescription": "Kindly fill these below imformation to get started with Zahra Ai Insight",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "placeholder": "Please enter your name..",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "Please enter your email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Comapany name",
+              "placeholder": "enter your company name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Required Services",
+              "placeholder": "e.g  web dev , mobile dev",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Industry",
+              "placeholder": "e.g tech , design",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Starting date",
+              "fieldType": "date",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "=onReceived",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -352,
+        -64
+      ],
+      "id": "962dba7e-068d-476a-8504-54379e13ef60",
+      "name": "On form submission",
+      "webhookId": "469d68bc-6f5b-40b5-97e8-a2cc085f5d33"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fd60ef92-13fd-4528-bbbe-e999a0eaf0e9",
+              "name": "Name",
+              "value": "={{ $json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "1e56db3b-7321-4c2e-b768-6bdb4f670c13",
+              "name": "Email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "d3c282de-4b4a-49f1-885c-aa099ef27871",
+              "name": "Comapany name",
+              "value": "={{ $json['Comapany name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "012aeb03-8ffd-4633-a800-51aac52e9ea2",
+              "name": "Required Services",
+              "value": "={{ $json['Required Services'] }}",
+              "type": "string"
+            },
+            {
+              "id": "9cd7655c-5f08-4c06-9026-000a3eda38ba",
+              "name": "Industry",
+              "value": "={{ $json.Industry }}",
+              "type": "string"
+            },
+            {
+              "id": "152a8d1e-c8c0-41cc-9ffb-f38fad1406e6",
+              "name": "Starting date",
+              "value": "={{ $json['Starting date'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        -64
+      ],
+      "id": "bc2bcda7-b30c-4e2d-bf16-b783580ed67c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a personalized welcome email to client.\n\nClient Name: {{ $json.Name }}\nClient Email: {{ $json.Email }}\nCompany Name: {{ $json['Comapany name'] }}\nIndustry: {{ $json.Industry }}\nRequired Services: {{ $json['Required Services'] }}\nStart Date: {{ $json['Starting date'] }}\n\nThe email should be professional, friendly, and show excitement about working together.\n\nInclude:\n- Welcome message\n- Mention their company and services\n- Start date\n- Inform them that they will receive another email with Terms of Service Agreement and they can sign or reply to confirm\n\nIMPORTANT FORMATTING INSTRUCTIONS:\n- At the end of the email, add owner details\n- Owner details MUST start from a new line\n- Each line should be separate\n- Make ALL owner details BOLD using HTML <b> tag\n- Add line breaks using <br>\n\nOwner Details to include:\n\n<b>Zahra Bashir</b><br>\n<b>Owner, Zahra AI Insights</b><br>\n<b>Phone: +923275057694</b><br>\n<b>Email: zahr9315@gmail.com</b>",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -32,
+        -416
+      ],
+      "id": "6a9ae00b-d6df-4976-9929-7b3f4d423d48",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -192
+      ],
+      "id": "25e2d49c-bef9-4e4e-bd35-2e5a1e492347",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HeVTrnHOZliEw8wP",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.output }}"
+            },
+            {
+              "content": "=Use this input:\n{{ $json.output }}\n\nReturn ONLY valid JSON. No text before or after.\n\n{\n  \"subject\": \"Email subject\",\n  \"body\": \"Email body\"\n}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {
+          "systemMessage": "=Parse the JSON  ' output' and output the following parameters Separately:\nSubject \nBody"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        -416
+      ],
+      "id": "23fe19fb-4a3b-4cdb-b27d-69759bba5b6d",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HeVTrnHOZliEw8wP",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f85d54df-8e3e-49e1-956a-5a3124dd1321",
+              "name": "",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "b4801783-6a83-42f2-b213-59c8542893be",
+              "name": "Subject",
+              "value": "={{ JSON.parse($json.content.parts[0].text).subject }}",
+              "type": "string"
+            },
+            {
+              "id": "6ef52b46-5cd4-4a49-99e2-a22e1ea633ce",
+              "name": "Body",
+              "value": "={{ JSON.parse($json.content.parts[0].text).body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        -416
+      ],
+      "id": "40fb26f8-0c50-446b-812e-b8dd1de2b9ee",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json.Email }}",
+        "subject": "={{ $json.Subject }}",
+        "message": "={{ $json.Body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        -352
+      ],
+      "id": "42da46d7-f7b7-4e50-9357-c9cc2cb3b45c",
+      "name": "Send a message",
+      "webhookId": "35c7013c-9733-4c1a-a097-53f8345a4dd4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "am4KWZohDiqnPL07",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a personalized welcome email to client.\n\nClient Name: {{ $json.Name }}\nClient Email: {{ $json.Email }}\nCompany Name: {{ $json['Comapany name'] }}\nIndustry: {{ $json.Industry }}\nRequired Services: {{ $json['Required Services'] }}\nStart Date: {{ $json['Starting date'] }}\n\nThe email should be professional, friendly, and show excitement about working together.\n\nInclude:\n- Welcome message\n- Mention their company and services\n- Start date\n- Inform them that they will receive another email with Terms of Service Agreement and they can sign or reply to confirm\n\nIMPORTANT FORMATTING INSTRUCTIONS:\n- At the end of the email, add owner details\n- Owner details MUST start from a new line\n- Each line should be separate\n- Make ALL owner details BOLD using HTML <b> tag\n- Add line breaks using <br>\n\nOwner Details to include:\n\n<b>Zahra Bashir</b><br>\n<b>Owner, Zahra AI Insights</b><br>\n<b>Phone: +923275057694</b><br>\n<b>Email: zahr9315@gmail.com</b>       ma chati hu term wali email bi aisi neat claen ho haeding bold har paragraph ka bad one line space and owner details bi bold proper email look so update the following   Generate a complete professional Terms of Service and Contract document.\n\nClient Details:\n- Name: {{ $json.Name }}\n- Company: {{ $json['Comapany name'] }}\n- Industry: {{ $json.Industry }}\n- Required Services: {{ $json['Required Services'] }}\n- Start Date: {{ $json['Starting date'] }}\n\nService Provider Details:\n- Company Name: Zahra AI Insights\n- Owner Name: Zahra Bashir\n- Phone: +923275057694\n- Email: zahr9315@gmail.com\n\nINSTRUCTIONS:\n- Write a formal, clear, and legally structured contract\n- Do NOT ask for missing details — create realistic professional terms yourself\n- Use proper headings and sections\n- Keep tone professional and business-oriented\n- Format the document cleanly\n- No explanations, no extra text — only the contract\n\nSTRUCTURE:\n\n1. Title: \"Terms of Service Agreement\"\n\n2. Introduction:\nClearly state agreement between Zahra AI Insights and the client, including purpose.\n\n3. Scope of Services:\nDefine services based on {{ $json['Required Services'] }} in a professional way.\n\n4. Start Date & Duration:\nMention start date and define contract duration (you decide reasonable terms).\n\n5. Payment Terms:\n- Define pricing structure (general, not exact amount)\n- Payment schedule\n- Late payment policy\n\n6. Obligations of Client:\n- Provide required information\n- Timely communication\n- Cooperation\n\n7. Obligations of Service Provider:\n- Deliver services professionally\n- Maintain confidentiality\n- Provide support\n\n8. Confidentiality Clause:\nProtect client and company data.\n\n9. Limitation of Liability:\nClearly limit responsibility for damages.\n\n10. Termination Clause:\nConditions under which contract can be terminated.\n\n11. Governing Law:\nUse a general applicable legal statement.\n\n12. Acceptance:\nInclude agreement acceptance statement.\n\n13. Signature Section:\nFormat properly with spacing:\n\nClient Signature: ______________________  \nClient Name: {{ $json.Name }}  \n\nService Provider: Zahra AI Insights  \nOwner: Zahra Bashir  \nSignature: ______________________  \n\nPhone: +923275057694  \nEmail: zahr9315@gmail.com  \n\nIMPORTANT:\n- Make headings bold\n- Keep spacing clean\n- Make it look like a real professional contract\n- Return ONLY the contract document",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "97d7a77d-0d5b-402f-8f14-3a8dda4bfaa8",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        224
+      ],
+      "id": "361441e1-4d7f-4124-96bd-9d037884fddc",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HeVTrnHOZliEw8wP",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "=models/gemini-2.5-flash",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Parse the Json 'output' and return the following parameters:\n- Title : Extract Only the \"title\" field.\n- Body :Combine all other fields into a single text block and format it like an official contract (e.g., NDA or terms of Services)\n{\n  \"title\": \"Email subject\",\n  \"body\": \"Email body\"\n}\n",
+              "role": "model"
+            },
+            {
+              "content": "={{ $json.output }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {
+          "systemMessage": "=Parse the JSON  ' output' and output the following parameters Separately: \ntitle\nBody"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        384,
+        -16
+      ],
+      "id": "10d8f8b9-17a3-4185-8313-ebbd1841b806",
+      "name": "Message a model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CdilOswvQuZPwigm",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4a38021c-1d32-4d68-9c79-b1f57523ef47",
+              "name": "title",
+              "value": "={{ JSON.parse($json.content.parts[0].text).title }}",
+              "type": "string"
+            },
+            {
+              "id": "442ef14b-d69e-4712-a986-e2664023e503",
+              "name": "body",
+              "value": "={{ JSON.parse($json.content.parts[0].text).body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        -16
+      ],
+      "id": "35921e02-bace-429a-aa55-afacdd37bf52",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "={{ $json.title }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        912,
+        -16
+      ],
+      "id": "3f36169a-a2e8-4941-85aa-0bb33fd12143",
+      "name": "Send a message1",
+      "webhookId": "5ace5e95-9c04-43c2-a1fc-2f81134946a0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "am4KWZohDiqnPL07",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        336,
+        384
+      ],
+      "id": "88de902c-546c-4a44-b49b-792fad0a6e87",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "0dRFCWqVfPV96EZw",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2d77549c-5eaa-4bb8-986d-6c40e54a86d6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "62df2a0ca04f663ae9897f4d03aa1328656e8ec33e02b36ab0f14f76d0a91be6"
+  },
+  "id": "kDSZGcBllpfcOJEh",
+  "tags": []
+}
