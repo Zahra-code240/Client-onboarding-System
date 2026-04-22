@@ -58,11 +58,11 @@ When a client submits a form, the system instantly generates and sends:
 ---
 
 ## 📷 Demo
-👉 Add screenshot here  
+## Worflow Screenshot
 <img width="1920" height="1020" alt="Screenshot 2026-04-19 232524" src="https://github.com/user-attachments/assets/46a29fb2-4656-4687-9e24-b4ce19e8b963" />
+## Output Form
 <img width="1920" height="1020" alt="Screenshot 2026-04-19 232750" src="https://github.com/user-attachments/assets/b7a019c9-5715-4c63-8e26-d67c1eff7d33" />
-
-Video link:
+ ## Demo Video link:
 https://www.youtube.com/watch?v=szj9Nx6Ex78
 
 ---
